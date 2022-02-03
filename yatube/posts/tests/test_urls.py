@@ -41,11 +41,11 @@ class TaskURLTests(TestCase):
                 self.assertTemplateUsed(response, template)
 
         templates_url_names = {
-            'posts/post_create.html': '/posts/13/edit/',
-            'posts/post_create.html': '/create/',
+            '/posts/13/edit/': 'posts/post_create.html',
+            '/create/': 'posts/post_create.html'
         }
 
-        for template, address in templates_url_names.items():
+        for address, template in templates_url_names.items():
             with self.subTest(address=address):
                 response = authorized_client.get(address)
                 self.assertTemplateUsed(response, template)
