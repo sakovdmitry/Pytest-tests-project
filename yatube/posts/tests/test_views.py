@@ -48,7 +48,7 @@ class TaskURLTests(TestCase):
                 self.assertTemplateUsed(response, template)
 
     def test_index_post_group_profile_show_correct_context(self):
-        """Шаблоны index, post_group, profile сформированы с правильным контекстом."""
+        """Шаблоны сформированы с правильным контекстом."""
         response_index = self.authorized_client.get(reverse('posts:index'))
         response_group_list = self.authorized_client.get(reverse(
             'posts:group_posts', kwargs={'slug': 'slug-slug'}))
