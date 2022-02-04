@@ -6,7 +6,7 @@ from posts.models import Post, Group
 User = get_user_model()
 
 
-class TaskURLTests(TestCase):
+class PostURLTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -26,8 +26,8 @@ class TaskURLTests(TestCase):
 
     def test_urls_uses_correct_template(self):
         """URL-адрес использует соответствующий шаблон."""
-        guest_client = TaskURLTests.guest_client
-        authorized_client = TaskURLTests.authorized_client
+        guest_client = self.guest_client
+        authorized_client = self.authorized_client
 
         templates_url_names = {
             'posts/index.html': '/',
@@ -50,5 +50,40 @@ class TaskURLTests(TestCase):
                 response = authorized_client.get(address)
                 self.assertTemplateUsed(response, template)
 
-        response = guest_client.get('/unexisting_page/')
+    def test_urls_uses_correct_template(self):
+        response = self.guest_client.get('/unexisting_page/')
         self.assertEqual(response.status_code, 404)
+
+    def test_pages_response_guest(self):
+        template_address = {
+            '/': 200,
+            '/group/slug-slug/': 200,
+            '/profile/auth/': 200,
+            '/posts/13/': 200,
+            '/create/': 302,
+            '/posts/13/edit/': 302
+        }
+        for address, code in template_address.items():
+            with self.subTest(address=address):
+                response = self.guest_client.get(address)
+                self.assertEqual(response.status_code, code)
+
+    def test_pages_response_authorized_user(self):
+        template_address = {
+            '/': 200,
+            '/create/': 200,
+            '/group/slug-slug/': 200,
+            '/profile/auth/': 200,
+            '/posts/13/': 200,
+            '/posts/13/edit/': 200
+        }
+        for address, code in template_address.items():
+            with self.subTest(address=address):
+                response = self.authorized_client.get(address)
+                self.assertEqual(response.status_code, code)
+
+    def test_edit_not_author(self):
+        User2 = User.objects.create_user(username='auth2')
+        Post.objects.create(text='123', author=User2, pk=12)
+        response = self.authorized_client.get('/posts/12/edit/')
+        self.assertEqual(response.status_code, 302)

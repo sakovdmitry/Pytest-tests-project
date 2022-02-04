@@ -2,19 +2,21 @@ from django.test import Client, TestCase
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 
-from posts.forms import PostForm
-from posts.models import Post
+from posts.models import Post, Group
 
 
 User = get_user_model()
 
 
-class TaskCreateFormTests(TestCase):
+class PostCreateFormTests(TestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Создаем форму, если нужна проверка атрибутов
-        cls.form = PostForm()
+        cls.group = Group.objects.create(
+            title='Тестовая группа',
+            slug='Тестовый слаг',
+        )
+        cls.guest_client = Client()
         cls.user = User.objects.create_user(username='auth')
         cls.authorized_client = Client()
         cls.authorized_client.force_login(cls.user)
@@ -24,33 +26,37 @@ class TaskCreateFormTests(TestCase):
         post_count = Post.objects.count()
         form_data = {
             'text': 'Тестовый заголовок',
-            'pk': 1
+            'pk': 1,
         }
-        response = self.authorized_client.post(
+        self.guest_client.post(
             reverse('posts:post_create'),
             data=form_data,
             follow=True
         )
-        self.assertRedirects(response, reverse(
+        self.assertNotEqual(Post.objects.count(), post_count + 1)
+        response_authorized_client = self.authorized_client.post(
+            reverse('posts:post_create'),
+            data=form_data,
+            follow=True
+        )
+        self.assertRedirects(response_authorized_client, reverse(
             'posts:profile', kwargs={'username': 'auth'}))
         self.assertEqual(Post.objects.count(), post_count + 1)
         self.assertTrue(
             Post.objects.filter(
                 text='Тестовый заголовок',
-                pk=1
+                pk=1,
             ).exists()
         )
 
     def test_edit_post(self):
-        form_data = {
-            'text': 'Тестовый заголовок',
-            'pk': 1
-        }
-        response = self.authorized_client.post(
-            reverse('posts:post_create'),
-            data=form_data,
-            follow=True
+        Post.objects.create(
+            text='Текст',
+            pk=1,
+            author=self.user,
+            group=self.group
         )
+        posts_count_before = Post.objects.count()
         form_data = {
             'text': 'Тестовый отредактированный',
             'pk': 1
@@ -65,6 +71,9 @@ class TaskCreateFormTests(TestCase):
         self.assertTrue(
             Post.objects.filter(
                 text='Тестовый отредактированный',
-                pk=1
+                pk=1,
             ).exists()
         )
+        posts_count_after = Post.objects.count()
+        self.assertEqual(posts_count_before, posts_count_after)
+        self.assertFalse(Post.objects.filter(text='Текст'))
