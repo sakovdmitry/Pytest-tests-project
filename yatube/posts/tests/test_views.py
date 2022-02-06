@@ -4,7 +4,6 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from posts.models import Post, Group
-
 from posts.forms import PostForm
 
 User = get_user_model()
@@ -25,7 +24,6 @@ class PostURLTests(TestCase):
         )
         cls.post = Post.objects.create(
             group=cls.group,
-            pk=13,
             author=cls.user,
             text='Тестовая группа тестовая группа',
         )
@@ -55,34 +53,40 @@ class PostURLTests(TestCase):
         """Шаблоны сформированы с правильным контекстом."""
         response_index = self.authorized_client.get(reverse('posts:index'))
         context_index = response_index.context['page_obj'][0]
-        group_title = context_index.group.title
-        author_name = context_index.author.username
-        post_text = context_index.text
-        self.assertEqual(group_title, 'Тестовая группа')
-        self.assertEqual(author_name, 'auth')
-        self.assertEqual(post_text, 'Тестовая группа тестовая группа')
+        contexts = {
+            context_index.group.title: self.group.title,
+            context_index.author.username: self.user.username,
+            context_index.text: self.post.text
+        }
+        for template_context, instanse_context in contexts.items():
+            with self.subTest(template_context=template_context):
+                self.assertEqual(template_context, instanse_context)
 
     def test_group_list_show_correct_context(self):
         response_group_list = self.authorized_client.get(reverse(
             'posts:group_posts', kwargs={'slug': self.group.slug}))
         context_group_list = response_group_list.context['page_obj'][0]
-        group_title = context_group_list.group.title
-        author_name = context_group_list.author.username
-        post_text = context_group_list.text
-        self.assertEqual(group_title, 'Тестовая группа')
-        self.assertEqual(author_name, 'auth')
-        self.assertEqual(post_text, 'Тестовая группа тестовая группа')
+        contexts = {
+            context_group_list.group.title: self.group.title,
+            context_group_list.author.username: self.user.username,
+            context_group_list.text: self.post.text
+        }
+        for template_context, instanse_context in contexts.items():
+            with self.subTest(template_context=template_context):
+                self.assertEqual(template_context, instanse_context)
 
     def test_profile_show_correct_context(self):
         response_profile = self.authorized_client.get(reverse(
             'posts:profile', kwargs={'username': self.user.username}))
         context_profile = response_profile.context['page_obj'][0]
-        group_title = context_profile.group.title
-        author_name = context_profile.author.username
-        post_text = context_profile.text
-        self.assertEqual(group_title, 'Тестовая группа')
-        self.assertEqual(author_name, 'auth')
-        self.assertEqual(post_text, 'Тестовая группа тестовая группа')
+        contexts = {
+            context_profile.group.title: self.group.title,
+            context_profile.author.username: self.user.username,
+            context_profile.text: self.post.text
+        }
+        for template_context, instanse_context in contexts.items():
+            with self.subTest(template_context=template_context):
+                self.assertEqual(template_context, instanse_context)
 
     def test_index_post_detail_show_correct_context(self):
         """Шаблон post_detail сформирован с правильным контекстом."""
@@ -91,7 +95,7 @@ class PostURLTests(TestCase):
         self.assertEqual(response.context.get(
             'post').author.username, self.user.username)
         self.assertEqual(response.context.get(
-            'post').text, 'Тестовая группа тестовая группа')
+            'post').text, self.post.text)
         self.assertEqual(response.context.get('post').pk, self.post.pk)
 
     def test_create_edit_show_correct_context(self):
@@ -114,9 +118,9 @@ class PostURLTests(TestCase):
                 self.assertIsInstance(form_field_edit, expected)
 
         context = response_edit.context.get('is_edit')
-        self.assertEqual(type(context), bool)
+        self.assertIsInstance(context, bool)
         context = response_edit.context.get('form')
-        self.assertEqual(type(context), PostForm)
+        self.assertIsInstance(context, PostForm)
 
 
 class PaginatorViewsTest(TestCase):

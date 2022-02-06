@@ -26,7 +26,7 @@ class PostCreateFormTests(TestCase):
         post_count = Post.objects.count()
         form_data = {
             'text': 'Тестовый заголовок',
-            'pk': 1,
+            'group_title': self.group.title
         }
         self.guest_client.post(
             reverse('posts:post_create'),
@@ -45,21 +45,18 @@ class PostCreateFormTests(TestCase):
         self.assertTrue(
             Post.objects.filter(
                 text='Тестовый заголовок',
-                pk=1,
             ).exists()
         )
 
     def test_edit_post(self):
         Post.objects.create(
             text='Текст',
-            pk=1,
             author=self.user,
             group=self.group
         )
         posts_count_before = Post.objects.count()
         form_data = {
             'text': 'Тестовый отредактированный',
-            'pk': 1
         }
         response = self.authorized_client.post(
             reverse('posts:post_edit', kwargs={'post_id': 1}),
@@ -71,7 +68,6 @@ class PostCreateFormTests(TestCase):
         self.assertTrue(
             Post.objects.filter(
                 text='Тестовый отредактированный',
-                pk=1,
             ).exists()
         )
         posts_count_after = Post.objects.count()
