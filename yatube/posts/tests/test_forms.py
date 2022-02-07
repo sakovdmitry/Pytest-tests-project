@@ -21,19 +21,28 @@ class PostCreateFormTests(TestCase):
         cls.authorized_client = Client()
         cls.authorized_client.force_login(cls.user)
 
-    def test_create_post(self):
+    def test_create_post_guest_client(self):
         """Валидная форма создает запись в Post."""
         post_count = Post.objects.count()
         form_data = {
             'text': 'Тестовый заголовок',
             'group_title': self.group.title
         }
-        self.guest_client.post(
+        response_guest_client = self.guest_client.post(
             reverse('posts:post_create'),
             data=form_data,
             follow=True
         )
+        self.assertRedirects(response_guest_client,
+                             '/auth/login/?next=/create/')
         self.assertNotEqual(Post.objects.count(), post_count + 1)
+
+    def test_create_post_authorized_client(self):
+        post_count = Post.objects.count()
+        form_data = {
+            'text': 'Тестовый заголовок',
+            'group_title': self.group.title
+        }
         response_authorized_client = self.authorized_client.post(
             reverse('posts:post_create'),
             data=form_data,

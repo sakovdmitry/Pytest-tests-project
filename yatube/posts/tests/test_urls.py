@@ -89,7 +89,6 @@ class PostURLTests(TestCase):
                                                kwargs={'post_id': post.pk}))
 
     def test_edit_guest_client(self):
-        post = Post.objects.create(text='123', author=self.user)
         response = self.guest_client.get(
-            reverse('posts:post_edit', kwargs={'post_id': post.pk}))
-        self.assertRedirects(response, '/auth/login/?next=/posts/2/edit/')
+            reverse('posts:post_edit', kwargs={'post_id': self.post.pk}))
+        self.assertRedirects(response, '/auth/login/?next=/posts/1/edit/')
