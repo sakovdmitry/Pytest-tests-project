@@ -52,19 +52,22 @@ def post_detail(request, post_id):
     author = post.author
     posts = author.posts.all()
     pub_date = post.pub_date
-
+    form = CommentForm(request.POST or None)
+    comments = post.comments.all()
     context = {
         'post': post,
         'author': author,
         'pub_date': pub_date,
-        'posts': posts
+        'posts': posts,
+        'form': form,
+        'comments': comments
     }
     return render(request, 'posts/post_detail.html', context)
 
 
 @login_required
 def post_create(request):
-    form = PostForm(request.POST or None)
+    form = PostForm(request.POST or None, files=request.FILES or None)
     if form.is_valid():
         post = form.save(commit=False)
         post.author = request.user
@@ -105,10 +108,4 @@ def add_comment(request, post_id):
         comment.post = post
         comment.save()
         return redirect('posts:post_detail', post_id=post_id)
-    else:
-        form = CommentForm()
-    context = {
-        'post': post,
-        'form': form,
-    }
-    return render(request, 'posts/post_detail.html', context)
+    return render(request, 'posts/post_detail.html', {"form": form})

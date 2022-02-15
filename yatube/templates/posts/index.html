@@ -4,8 +4,11 @@
 {% endblock %}
 {% block content %}
   <h1>Последние обновления на сайте</h1>
+  {% load cache %}
+  {% cache 20 index_page %}
     {% for post in page_obj %}
       {% include 'includes/posts.html' %}
     {% endfor %}
     {% include 'includes/paginator.html' %}
+  {% endcache %} 
 {% endblock %}

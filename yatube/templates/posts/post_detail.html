@@ -33,7 +33,7 @@
       {% endthumbnail %}
       <p>
         {{ post }}
-        {% include 'posts/comments.html' %} 
+        {% include 'includes/comments.html' %} 
       </p>
       {% if user.is_authenticated and user == post.author %}
         <a class="btn btn-primary" href="{% url 'posts:post_edit' post.pk %}">
