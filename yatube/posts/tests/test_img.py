@@ -1,8 +1,5 @@
 import shutil
 import tempfile
-from tokenize import group
-
-from django import forms
 
 from posts.models import Post, Group
 from django.conf import settings
@@ -14,6 +11,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 TEMP_MEDIA_ROOT = tempfile.mkdtemp(dir=settings.BASE_DIR)
+
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
 class PostFormTests(TestCase):
@@ -67,7 +65,7 @@ class PostFormTests(TestCase):
         )
         self.assertRedirects(response, reverse(
             'posts:profile', kwargs={'username': 'auth'}))
-        self.assertEqual(Post.objects.count(), post_count+1)
+        self.assertEqual(Post.objects.count(), post_count + 1)
         self.assertTrue(
             Post.objects.filter(
                 text='Тестовый текст',

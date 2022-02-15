@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 
 from .forms import PostForm, CommentForm
-from .models import Group, Post, User
+from .models import Group, Post, User, Follow
 
 
 POSTS_PER_PAGE = 10
@@ -109,3 +109,23 @@ def add_comment(request, post_id):
         comment.save()
         return redirect('posts:post_detail', post_id=post_id)
     return render(request, 'posts/post_detail.html', {"form": form})
+
+
+@login_required
+def follow_index(request):
+    # информация о текущем пользователе доступна в переменной request.user
+    # ...
+    context = {}
+    return render(request, 'posts/follow.html', context)
+
+
+@login_required
+def profile_follow(request, username):
+    # Подписаться на автора
+    ...
+
+
+@login_required
+def profile_unfollow(request, username):
+    # Дизлайк, отписка
+    ...
