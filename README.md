@@ -1,3 +1,11 @@
-# hw04_tests
+# Pytest-tests-project
+## Описание проекта
+Покрытие проекта Yatube юнит-тестами
 
-[![CI](https://github.com/yandex-praktikum/hw04_tests/actions/workflows/python-app.yml/badge.svg?branch=master)](https://github.com/yandex-praktikum/hw04_tests/actions/workflows/python-app.yml)
+## Используемые технологии
+- Python 3.9.0
+- Django 2.2.16
+- pytest 6.2.4
+
+## Author
+Dmitry Sakov (sakovdmitry@gmail.com)
